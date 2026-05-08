@@ -1,0 +1,310 @@
+@import 'tailwindcss';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+@source '../**/*.blade.php';
+@source '../**/*.js';
+
+@theme {
+    --font-sans: 'Plus Jakarta Sans', 'Inter', ui-sans-serif, system-ui, sans-serif;
+    
+    --color-primary: #0f172a;
+    --color-primary-hover: #334155;
+    
+    --color-accent: #0d9488; /* teal-600 */
+    --color-accent-hover: #0f766e; /* teal-700 */
+    
+    --color-vibrant-indigo: #4f46e5;
+    --color-vibrant-rose: #e11d48;
+    --color-vibrant-amber: #f59e0b;
+}
+
+@layer base {
+    body {
+        @apply bg-slate-100 text-slate-800 antialiased font-sans;
+    }
+}
+
+@layer components {
+    /* Layout & Containers */
+    .app-shell {
+        @apply flex h-screen overflow-hidden bg-slate-50;
+    }
+    
+    .page-hero {
+        @apply bg-white p-6 md:p-8 rounded-[2rem] border border-slate-200 shadow-sm mb-8
+               bg-gradient-to-br from-white to-slate-50/50 relative overflow-hidden;
+    }
+    
+    .page-hero::before {
+        content: '';
+        @apply absolute top-0 right-0 w-64 h-64 bg-accent/5 rounded-full -mr-20 -mt-20 blur-3xl;
+    }
+    
+    .page-hero h1 {
+        @apply text-2xl md:text-4xl font-black text-slate-900 tracking-tight leading-tight;
+    }
+    
+    .page-hero p {
+        @apply mt-2 text-slate-500 max-w-3xl leading-relaxed;
+    }
+    
+    .app-eyebrow {
+        @apply block text-xs font-semibold tracking-widest uppercase text-slate-500 mb-2;
+    }
+
+    /* Cards */
+    .surface-card,
+    .surface-form,
+    .surface-panel {
+        @apply bg-white p-6 rounded-2xl border border-slate-200 shadow-sm;
+    }
+    
+    .metric-grid {
+        @apply grid gap-4 md:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 mb-6;
+    }
+    
+    .stat-card {
+        @apply bg-white p-3 sm:p-5 rounded-2xl border border-slate-200 shadow-sm
+               flex items-start gap-3 sm:gap-4
+               hover:shadow-md hover:-translate-y-0.5 transition-all duration-200;
+    }
+
+    .stat-card-icon {
+        @apply flex-shrink-0 flex items-center justify-center
+               w-8 h-8 sm:w-10 sm:h-10 rounded-xl;
+    }
+
+    .stat-card-body {
+        @apply flex flex-col min-w-0;
+    }
+
+    .stat-card-label {
+        @apply text-[10px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wide;
+    }
+
+    .stat-card-value {
+        @apply mt-1 text-xl sm:text-2xl font-bold text-slate-900 tracking-tight leading-none;
+    }
+
+    .stat-card-sub {
+        @apply mt-1.5 text-[10px] sm:text-xs text-slate-400 font-medium;
+    }
+
+    .surface-list {
+        @apply flex flex-col gap-3;
+    }
+
+    .surface-list-item {
+        @apply bg-white p-4 rounded-xl border border-slate-200 shadow-sm transition-all duration-200;
+    }
+    
+    .mini-grid {
+        @apply grid gap-3 grid-cols-2;
+    }
+
+    .mini-panel {
+        @apply bg-slate-50 p-4 rounded-xl border border-slate-200 flex flex-col;
+    }
+    .mini-panel span {
+        @apply text-xs font-medium text-slate-500 uppercase tracking-wide;
+    }
+    .mini-panel strong {
+        @apply mt-1 text-xl font-bold text-slate-900;
+    }
+
+    .hero-chip {
+        @apply inline-flex bg-slate-50 border border-slate-200 px-4 py-2 rounded-xl text-sm;
+    }
+    .hero-chip strong {
+        @apply block text-xs font-medium text-slate-500 uppercase tracking-wide mb-0.5;
+    }
+    .hero-chip span {
+        @apply font-semibold text-slate-900;
+    }
+
+    .page-hero-meta {
+        @apply flex flex-wrap gap-3 mt-6;
+    }
+
+    .page-hero-grid {
+        @apply grid gap-6;
+    }
+
+    .flash-alert {
+        @apply bg-white p-4 rounded-xl border border-slate-200 shadow-sm border-l-4;
+    }
+    .flash-alert[data-tone="error"] {
+        @apply border-l-red-500;
+    }
+    .flash-alert[data-tone="success"] {
+        @apply border-l-emerald-500;
+    }
+    .flash-alert-head h3 {
+        @apply font-semibold text-slate-900;
+    }
+    .flash-alert-head p {
+        @apply text-sm text-slate-500 mt-1;
+    }
+    
+    /* Buttons */
+    .btn-primary {
+        @apply inline-flex items-center justify-center px-4 py-2.5 text-sm font-medium text-white bg-slate-900 rounded-xl hover:bg-slate-800 transition-colors duration-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-900;
+    }
+    
+    .btn-secondary {
+        @apply inline-flex items-center justify-center px-4 py-2.5 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-xl hover:bg-slate-50 transition-colors duration-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500;
+    }
+    
+    .btn-danger {
+        @apply inline-flex items-center justify-center px-4 py-2.5 text-sm font-medium text-white bg-red-600 rounded-xl hover:bg-red-700 transition-colors duration-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-600;
+    }
+
+    .btn-success {
+        @apply inline-flex items-center justify-center px-4 py-2.5 text-sm font-medium text-white bg-emerald-600 rounded-xl hover:bg-emerald-700 transition-colors duration-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-600;
+    }
+
+    .btn-warning {
+        @apply inline-flex items-center justify-center px-4 py-2.5 text-sm font-medium text-white bg-amber-500 rounded-xl hover:bg-amber-600 transition-colors duration-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500;
+    }
+
+    .btn-vibrant {
+        @apply inline-flex items-center justify-center px-6 py-4 text-sm font-black uppercase tracking-widest text-white rounded-2xl transition-all duration-200 shadow-xl;
+    }
+    
+    .btn-vibrant-primary { @apply btn-vibrant bg-primary hover:bg-primary-hover shadow-primary/20; }
+    .btn-vibrant-accent  { @apply btn-vibrant bg-accent hover:bg-accent-hover shadow-accent/20; }
+    .btn-vibrant-rose    { @apply btn-vibrant bg-vibrant-rose hover:bg-rose-700 shadow-rose-200; }
+    .btn-vibrant-indigo  { @apply btn-vibrant bg-vibrant-indigo hover:bg-indigo-700 shadow-indigo-200; }
+
+    /* Custom Navigation Classes (from layouts/app.blade.php) */
+    .nav-active {
+        @apply bg-white/15 text-white font-semibold;
+    }
+    .nav-active .nav-ic { @apply text-teal-200; }
+
+    .sidebar-scroll::-webkit-scrollbar { @apply w-[3px]; }
+    .sidebar-scroll::-webkit-scrollbar-track { @apply bg-transparent; }
+    .sidebar-scroll::-webkit-scrollbar-thumb { @apply bg-white/15 rounded-full; }
+
+    @keyframes pageFadeIn {
+        from { opacity: 0; transform: translateY(5px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+    .page-content { animation: pageFadeIn 0.2s ease both; }
+
+    /* Tables */
+    .table-container {
+        @apply w-full overflow-hidden bg-white border border-slate-200 rounded-2xl shadow-sm;
+    }
+    
+    .table-auto-full {
+        @apply w-full text-left text-sm text-slate-600;
+    }
+    
+    .table-header {
+        @apply bg-slate-50/80 border-b border-slate-200 text-xs font-semibold tracking-wider text-slate-500 uppercase;
+    }
+    
+    .table-row {
+        @apply border-b border-slate-100 hover:bg-slate-50/80 transition-colors duration-150;
+    }
+    
+    .table-cell {
+        @apply px-6 py-4 whitespace-nowrap;
+    }
+
+    /* Surface Tables & Data Displays */
+    .surface-table {
+        @apply bg-white rounded-[2rem] border border-slate-200 shadow-sm overflow-hidden mb-8;
+    }
+    
+    .surface-table h2 {
+        @apply text-xl font-black text-slate-900 tracking-tight;
+    }
+    
+    .section-note {
+        @apply text-sm text-slate-500 mt-1.5 leading-relaxed;
+    }
+
+    .surface-table-wrap {
+        @apply overflow-x-auto;
+    }
+    
+    .surface-table table {
+        @apply w-full border-collapse text-sm;
+    }
+    
+    .surface-table thead tr {
+        @apply bg-slate-50 border-y border-slate-100;
+    }
+    
+    .surface-table th {
+        @apply px-6 py-4 text-left text-xs font-black uppercase tracking-widest text-slate-500 whitespace-nowrap;
+    }
+    
+    .surface-table td {
+        @apply px-6 py-4 border-b border-slate-50 align-middle;
+    }
+    
+    .surface-table tbody tr:last-child td {
+        @apply border-b-0;
+    }
+    
+    .surface-table tr:hover td {
+        @apply bg-slate-50/50;
+    }
+
+    .data-avatar {
+        @apply flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl
+               bg-slate-100 text-xs font-black text-slate-600 border border-slate-200/60;
+    }
+    
+    .data-stack {
+        @apply flex flex-col min-w-0;
+    }
+    
+    .data-stack strong {
+        @apply block truncate text-sm font-bold text-slate-900 leading-tight;
+    }
+    
+    .data-stack span {
+        @apply block truncate text-[11px] font-medium text-slate-400 mt-0.5 uppercase tracking-wider;
+    }
+
+    /* Badges */
+    .badge {
+        @apply inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium;
+    }
+    .badge-success { @apply bg-emerald-50 text-emerald-700 border border-emerald-200/60; }
+    .badge-warning { @apply bg-amber-50 text-amber-700 border border-amber-200/60; }
+    .badge-danger { @apply bg-red-50 text-red-700 border border-red-200/60; }
+    .badge-info { @apply bg-blue-50 text-blue-700 border border-blue-200/60; }
+    .badge-gray { @apply bg-slate-100 text-slate-700 border border-slate-200; }
+    
+    /* Forms */
+    .form-input, .form-select, .form-textarea {
+        @apply block w-full rounded-xl border-slate-300 text-slate-900 shadow-sm focus:border-slate-500 focus:ring-slate-500 sm:text-sm transition-shadow duration-200;
+    }
+    
+    .form-label {
+        @apply block text-sm font-medium text-slate-700 mb-1.5;
+    }
+    
+    .form-error {
+        @apply mt-1 text-sm text-red-600;
+    }
+
+    /* Glassmorphism & Vibrant Utils */
+    .glass-surface {
+        @apply bg-white/80 backdrop-blur-md border border-white/20 shadow-2xl;
+    }
+    
+    .bg-gradient-vibrant {
+        @apply bg-gradient-to-tr from-primary to-slate-700;
+    }
+
+    .subject-card {
+        @apply transition-all duration-300 hover:scale-[1.02] active:scale-[0.98];
+    }
+}
