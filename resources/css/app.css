@@ -177,12 +177,6 @@
     .btn-vibrant-rose    { @apply btn-vibrant bg-vibrant-rose hover:bg-rose-700 shadow-rose-200; }
     .btn-vibrant-indigo  { @apply btn-vibrant bg-vibrant-indigo hover:bg-indigo-700 shadow-indigo-200; }
 
-    /* Custom Navigation Classes (from layouts/app.blade.php) */
-    .nav-active {
-        @apply bg-white/15 text-white font-semibold;
-    }
-    .nav-active .nav-ic { @apply text-teal-200; }
-
     .sidebar-scroll::-webkit-scrollbar { @apply w-[3px]; }
     .sidebar-scroll::-webkit-scrollbar-track { @apply bg-transparent; }
     .sidebar-scroll::-webkit-scrollbar-thumb { @apply bg-white/15 rounded-full; }

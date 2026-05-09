@@ -9,12 +9,18 @@
 
             <div class="mt-8 flex gap-2">
                 <button @click="tab = 'permissions'" 
-                        :class="tab === 'permissions' ? 'btn-vibrant-primary scale-105' : 'bg-slate-100 text-slate-500'"
+                        :class="{
+                            'bg-slate-900 text-white shadow-lg scale-105': tab === 'permissions',
+                            'bg-slate-100 text-slate-500 hover:bg-slate-200': tab !== 'permissions'
+                        }"
                         class="rounded-2xl px-8 py-3 text-sm font-bold transition-all duration-200">
                     Izin Jam Pelajaran ({{ $permissions->count() }})
                 </button>
                 <button @click="tab = 'corrections'" 
-                        :class="tab === 'corrections' ? 'btn-vibrant-primary scale-105' : 'bg-slate-100 text-slate-500'"
+                        :class="{
+                            'bg-slate-900 text-white shadow-lg scale-105': tab === 'corrections',
+                            'bg-slate-100 text-slate-500 hover:bg-slate-200': tab !== 'corrections'
+                        }"
                         class="rounded-2xl px-8 py-3 text-sm font-bold transition-all duration-200">
                     Koreksi Absen ({{ $corrections->count() }})
                 </button>
@@ -22,7 +28,7 @@
         </section>
 
         {{-- Tab Izin --}}
-        <div x-show="tab === 'permissions'" class="space-y-4">
+        <div x-show="tab === 'permissions'" x-cloak class="space-y-4">
             @forelse($permissions as $perm)
                 <div class="surface-card flex flex-col md:flex-row md:items-center justify-between gap-6 hover:border-accent/30 transition-all duration-300">
                     <div class="flex items-center gap-4">
@@ -48,7 +54,7 @@
                         </form>
                         <form action="{{ route('admin.approvals.permission.approve', $perm) }}" method="POST" class="flex-1 md:flex-none">
                             @csrf @method('PATCH')
-                            <button type="submit" class="w-full btn-primary px-8 shadow-primary/20">Setujui</button>
+                            <button type="submit" class="w-full btn-primary px-8 shadow-slate-900/20">Setujui</button>
                         </form>
                     </div>
                 </div>
@@ -58,7 +64,7 @@
         </div>
 
         {{-- Tab Koreksi --}}
-        <div x-show="tab === 'corrections'" class="space-y-4">
+        <div x-show="tab === 'corrections'" x-cloak class="space-y-4">
             @forelse($corrections as $corr)
                 <div class="surface-card flex flex-col md:flex-row md:items-center justify-between gap-6 hover:border-accent/30 transition-all duration-300">
                     <div class="flex items-center gap-4">
@@ -83,7 +89,7 @@
                         </form>
                         <form action="{{ route('admin.approvals.correction.approve', $corr) }}" method="POST" class="flex-1 md:flex-none">
                             @csrf @method('PATCH')
-                            <button type="submit" class="w-full btn-primary px-8 shadow-primary/20">Setujui</button>
+                            <button type="submit" class="w-full btn-primary px-8 shadow-slate-900/20">Setujui</button>
                         </form>
                     </div>
                 </div>

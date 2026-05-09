@@ -74,6 +74,9 @@
                 <div class="mini-grid">
                     <div class="mini-panel">
                         <span>Tanggal</span>
+                        <strong>{{ request('date', $date) }}</strong>
+                    </div>
+                </div>
             </div>
         </section>
 
@@ -118,11 +121,13 @@
             </div>
 
             <!-- TAB 1: DATA HARIAN -->
-            <div x-show="tab === 'harian'" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 transform scale-95" x-transition:enter-end="opacity-100 transform scale-100" class="surface-table">
-                <div class="px-6 py-6">
-                <h2>Rekap Kehadiran Harian</h2>
-                <p class="section-note">Lihat status masuk, pulang, dan riwayat detail setiap pegawai pada tanggal terpilih.</p>
-            </div>
+            <div x-show="tab === 'harian'" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 transform scale-95" x-transition:enter-end="opacity-100 transform scale-100" class="space-y-8">
+
+                <section class="surface-table">
+                    <div class="px-6 py-6">
+                        <h2>Rekap Kehadiran Harian</h2>
+                        <p class="section-note">Lihat status masuk, pulang, dan riwayat detail setiap pegawai pada tanggal terpilih.</p>
+                    </div>
 
             <div class="surface-table-wrap">
                 <table>
@@ -182,16 +187,16 @@
                 </table>
             </div>
 
-            <div class="px-6 py-5">
-                {{ $attendances->links() }}
-            </div>
-        </section>
+                    <div class="px-6 py-5">
+                        {{ $attendances->links() }}
+                    </div>
+                </section>
 
-        <section class="surface-table">
-            <div class="px-6 py-6">
-                <h2>Izin Sesi Guru (Menunggu ACC)</h2>
-                <p class="section-note">Persetujuan izin per mata pelajaran/jam pelajaran guru.</p>
-            </div>
+                <section class="surface-table">
+                    <div class="px-6 py-6">
+                        <h2>Izin Sesi Guru (Menunggu ACC)</h2>
+                        <p class="section-note">Persetujuan izin per mata pelajaran/jam pelajaran guru.</p>
+                    </div>
 
             <div class="surface-table-wrap">
                 <table>
@@ -249,16 +254,16 @@
                 </table>
             </div>
 
-            <div class="px-6 py-5">
-                {{ $pendingSessionLeaves->links() }}
-            </div>
-        </section>
+                    <div class="px-6 py-5">
+                        {{ $pendingSessionLeaves->links() }}
+                    </div>
+                </section>
 
-        <section class="surface-table">
-            <div class="px-6 py-6">
-                <h2>Cuti Pending</h2>
-                <p class="section-note">Pengajuan cuti harian yang masih menunggu persetujuan admin.</p>
-            </div>
+                <section class="surface-table">
+                    <div class="px-6 py-6">
+                        <h2>Cuti Pending</h2>
+                        <p class="section-note">Pengajuan cuti harian yang masih menunggu persetujuan admin.</p>
+                    </div>
 
             <div class="surface-table-wrap">
                 <table>
@@ -321,20 +326,21 @@
                                     </div>
                                 </td>
                             </tr>
-@empty
+                        @empty
                             <tr><td colspan="5"><x-empty-state message="Tidak ada cuti pending." /></td></tr>
                         @endforelse
                     </tbody>
                 </table>
-            </div>
+                </div>
 
-            <div class="px-6 py-5">
-                {{ $pendingLeaves->links() }}
-            </div>
-        </section>
-        </div>
+                <div class="px-6 py-5">
+                    {{ $pendingLeaves->links() }}
+                </div>
+                </section>
 
-        <!-- TAB 2: REKAP BULANAN -->
+            </div>{{-- END TAB 1: DATA HARIAN --}}
+
+            <!-- TAB 2: REKAP BULANAN -->
         <div x-show="tab === 'rekap'" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 transform scale-95" x-transition:enter-end="opacity-100 transform scale-100" style="display: none;" class="surface-table">
             <div class="px-6 py-6">
                 <h2>Rekap Matriks Kehadiran</h2>
@@ -394,7 +400,8 @@
                     </tbody>
                 </table>
             </div>
-        </div>
-        </div>
-    </div>
+        </div>{{-- END TAB 2: REKAP BULANAN --}}
+
+        </div>{{-- END x-data Alpine tab --}}
+    </div>{{-- END space-y-6 --}}
 </x-layouts.admin>

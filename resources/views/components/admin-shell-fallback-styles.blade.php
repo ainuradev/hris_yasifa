@@ -82,15 +82,6 @@
         border-bottom: 1px solid rgba(13, 148, 136, 0.08);
     }
 
-    .app-brand-mark,
-    .data-avatar {
-        display: grid;
-        place-items: center;
-        background: linear-gradient(135deg, var(--panel-teal), var(--panel-teal-dark));
-        color: #fff;
-        box-shadow: 0 14px 30px rgba(13, 148, 136, 0.2);
-    }
-
     .app-brand-mark {
         width: 52px;
         height: 52px;
@@ -364,7 +355,7 @@
     .flash-alert,
     .empty-state {
         border-radius: 30px;
-        overflow: hidden;
+        /* Removed overflow: hidden — it was cutting off ::before decorative blur orbs */
     }
 
     .page-hero {
@@ -657,23 +648,47 @@
     .error-text { margin-top: 8px; font-size: 12px; color: #DC2626; }
 
     .data-avatar {
-        width: 44px;
-        height: 44px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
         border-radius: 14px;
-        font-size: 14px;
+        font-size: 12px;
         font-weight: 800;
         flex-shrink: 0;
+        background: #f1f5f9;
+        color: #475569;
+        border: 1px solid rgba(226, 232, 240, 0.6);
+    }
+
+    .data-stack {
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
     }
 
     .data-stack strong {
         display: block;
         font-size: 14px;
+        font-weight: 700;
+        color: var(--panel-text);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 
     .data-stack span {
         display: block;
         margin-top: 4px;
-        font-size: 13px;
+        font-size: 11px;
+        font-weight: 500;
+        color: var(--panel-text-soft);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
     }
 
     .mobile-dock {

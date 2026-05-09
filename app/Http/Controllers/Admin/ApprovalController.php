@@ -7,6 +7,7 @@ use App\Models\SubjectPermission;
 use App\Models\AttendanceCorrection;
 use App\Models\Attendance;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class ApprovalController extends Controller
 {
@@ -49,7 +50,7 @@ class ApprovalController extends Controller
 
     public function approveCorrection(AttendanceCorrection $correction)
     {
-        \DB::transaction(function () use ($correction) {
+        DB::transaction(function () use ($correction) {
             $correction->update([
                 'status' => 'approved',
                 'reviewed_by' => auth()->id(),

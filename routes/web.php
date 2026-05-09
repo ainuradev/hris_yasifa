@@ -4,7 +4,7 @@ use App\Http\Controllers\Admin\AbsensiController as AdminAbsensiController;
 use App\Http\Controllers\Admin\AnnouncementController as AdminAnnouncementController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\EmployeeController as AdminEmployeeController;
-use App\Http\Controllers\Admin\EmployeeRequestController as AdminEmployeeRequestController;
+
 use App\Http\Controllers\Admin\JadwalGuruController as AdminJadwalGuruController;
 use App\Http\Controllers\Admin\PenggajianController as AdminPenggajianController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
