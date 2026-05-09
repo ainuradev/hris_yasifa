@@ -5,9 +5,11 @@ namespace App\Services;
 use App\Enums\AttendanceStatus;
 use App\Enums\EmployeeType;
 use App\Enums\PayrollCategory;
+use App\Enums\DayType;
 use App\Models\Attendance;
 use App\Models\Employee;
 use App\Models\Holiday;
+use App\Models\Schedule;
 use App\Models\SubjectPermission;
 use Carbon\Carbon;
 
@@ -147,6 +149,9 @@ class PayrollService
                 $totalDeduction += (float) $empComp->amount;
             }
         }
+
+        // 0. Hitung Alpa
+        $alpaCount = $this->calculateAlpaCount($employee, $month, $year, (int) $employee->unit_id);
 
         // 1. Hitung Hari Kerja Efektif bulan ini
         $workingDays = $this->calculateEffectiveWorkingDays($month, $year, (int) $employee->unit_id);

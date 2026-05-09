@@ -259,84 +259,82 @@
                     </div>
                 </section>
 
+                @if(!auth()->user()->isAdminPusat())
                 <section class="surface-table">
                     <div class="px-6 py-6">
                         <h2>Cuti Pending</h2>
                         <p class="section-note">Pengajuan cuti harian yang masih menunggu persetujuan admin.</p>
                     </div>
 
-            <div class="surface-table-wrap">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Pegawai</th>
-                            <th>Unit</th>
-                            <th>Jenis Cuti</th>
-                            <th>Rentang Tanggal</th>
-                            <th class="text-center">Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse($pendingLeaves as $leave)
-                            <tr>
-                                <td>
-                                    <div class="data-stack">
-                                        <strong>{{ $leave->employee?->name }}</strong>
-                                        <span>{{ $leave->employee?->nik }}</span>
-                                    </div>
-                                </td>
-                                <td><span class="font-bold text-slate-700 text-xs">{{ $leave->employee?->unit?->name }}</span></td>
-                                <td>
-                                    @php
-                                        $jenisRaw = str_replace('_', ' ', $leave->leave_type->value ?? $leave->leave_type);
-                                        $jenisLower = strtolower($jenisRaw);
-                                        $leaveBadge = match(true) {
-                                            str_contains($jenisLower, 'sakit') => 'bg-rose-50 border-rose-100 text-rose-600',
-                                            str_contains($jenisLower, 'izin') => 'bg-amber-50 border-amber-100 text-amber-600',
-                                            str_contains($jenisLower, 'tahunan') => 'bg-blue-50 border-blue-100 text-blue-600',
-                                            default => 'bg-slate-50 border-slate-100 text-slate-600',
-                                        };
-                                    @endphp
-                                    <span class="inline-flex items-center rounded-lg border px-2.5 py-1 text-[11px] font-black uppercase tracking-wider {{ $leaveBadge }}">
-                                        {{ $jenisRaw }}
-                                    </span>
-                                </td>
-                                <td>
-                                    <div class="data-stack">
-                                        <strong>{{ $leave->start_date->format('d M Y') }}</strong>
-                                        <span>Sampai {{ $leave->end_date->format('d M Y') }}</span>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="flex justify-center gap-2">
-                                        @if (! auth()->user()->isAdminPusat())
-                                            <form method="POST" action="{{ route('admin.absensi.approve', $leave) }}">
-                                                @csrf
-                                                @method('PATCH')
-                                                <button class="btn-success py-2 px-4 shadow-emerald-100">Setuju</button>
-                                            </form>
-                                            <form method="POST" action="{{ route('admin.absensi.reject', $leave) }}">
-                                                @csrf
-                                                @method('PATCH')
-                                                <button class="btn-danger py-2 px-4 shadow-rose-100">Tolak</button>
-                                            </form>
-                                        @else
-                                            <span class="text-xs font-bold uppercase tracking-widest text-slate-400">Menunggu Admin Unit</span>
-                                        @endif
-                                    </div>
-                                </td>
-                            </tr>
-                        @empty
-                            <tr><td colspan="5"><x-empty-state message="Tidak ada cuti pending." /></td></tr>
-                        @endforelse
-                    </tbody>
-                </table>
-                </div>
+                    <div class="surface-table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Pegawai</th>
+                                    <th>Unit</th>
+                                    <th>Jenis Cuti</th>
+                                    <th>Rentang Tanggal</th>
+                                    <th class="text-center">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($pendingLeaves as $leave)
+                                    <tr>
+                                        <td>
+                                            <div class="data-stack">
+                                                <strong>{{ $leave->employee?->name }}</strong>
+                                                <span>{{ $leave->employee?->nik }}</span>
+                                            </div>
+                                        </td>
+                                        <td><span class="font-bold text-slate-700 text-xs">{{ $leave->employee?->unit?->name }}</span></td>
+                                        <td>
+                                            @php
+                                                $jenisRaw = str_replace('_', ' ', $leave->leave_type->value ?? $leave->leave_type);
+                                                $jenisLower = strtolower($jenisRaw);
+                                                $leaveBadge = match(true) {
+                                                    str_contains($jenisLower, 'sakit') => 'bg-rose-50 border-rose-100 text-rose-600',
+                                                    str_contains($jenisLower, 'izin') => 'bg-amber-50 border-amber-100 text-amber-600',
+                                                    str_contains($jenisLower, 'tahunan') => 'bg-blue-50 border-blue-100 text-blue-600',
+                                                    default => 'bg-slate-50 border-slate-100 text-slate-600',
+                                                };
+                                            @endphp
+                                            <span class="inline-flex items-center rounded-lg border px-2.5 py-1 text-[11px] font-black uppercase tracking-wider {{ $leaveBadge }}">
+                                                {{ $jenisRaw }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <div class="data-stack">
+                                                <strong>{{ $leave->start_date->format('d M Y') }}</strong>
+                                                <span>Sampai {{ $leave->end_date->format('d M Y') }}</span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="flex justify-center gap-2">
+                                                <form method="POST" action="{{ route('admin.absensi.approve', $leave) }}">
+                                                    @csrf
+                                                    @method('PATCH')
+                                                    <button class="btn-success py-2 px-4 shadow-emerald-100">Setuju</button>
+                                                </form>
+                                                <form method="POST" action="{{ route('admin.absensi.reject', $leave) }}">
+                                                    @csrf
+                                                    @method('PATCH')
+                                                    <button class="btn-danger py-2 px-4 shadow-rose-100">Tolak</button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr><td colspan="5"><x-empty-state message="Tidak ada cuti pending." /></td></tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
 
-                <div class="px-6 py-5">
-                    {{ $pendingLeaves->links() }}
-                </div>
+                    <div class="px-6 py-5">
+                        {{ $pendingLeaves->links() }}
+                    </div>
                 </section>
+                @endif
 
             </div>{{-- END TAB 1: DATA HARIAN --}}
 
