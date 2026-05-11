@@ -8,6 +8,7 @@ use App\Models\TeacherDetail;
 use App\Models\TeacherSubjectUnit;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Collection;
+use Illuminate\Database\QueryException;
 use Illuminate\Validation\ValidationException;
 
 class SchedulePlottingService
@@ -48,19 +49,28 @@ class SchedulePlottingService
             $this->validateRecords(collect([$record]), $ignoreIds);
         }
 
-        return DB::transaction(function () use ($class, $slotQuery, $replaceQuery, $record): ?TeacherSubjectUnit {
-            if ($record === null || ! $class->allow_team_teaching) {
-                $slotQuery->delete();
-            } else {
-                $replaceQuery->delete();
+        try {
+            return DB::transaction(function () use ($class, $slotQuery, $replaceQuery, $record): ?TeacherSubjectUnit {
+                if ($record === null || ! $class->allow_team_teaching) {
+                    $slotQuery->delete();
+                } else {
+                    $replaceQuery->delete();
+                }
+
+                if ($record === null) {
+                    return null;
+                }
+
+                return TeacherSubjectUnit::create($record);
+            });
+        } catch (QueryException $e) {
+            if ($e->errorInfo[1] === 1062
+                && str_contains($e->errorInfo[2] ?? '', 'teacher_subject_unit_class_slot_unique')) {
+                $this->fail('Jam Kelas sudah terisi');
             }
 
-            if ($record === null) {
-                return null;
-            }
-
-            return TeacherSubjectUnit::create($record);
-        });
+            throw $e;
+        }
     }
 
     public function validateRecords(Collection $records, array $ignoreIds = []): void

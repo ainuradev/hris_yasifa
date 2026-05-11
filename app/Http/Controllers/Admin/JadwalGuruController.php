@@ -165,6 +165,11 @@ class JadwalGuruController extends Controller
                     }
                 });
                 return response()->json(['message' => 'Jadwal berhasil diperbarui.']);
+            } catch (\Illuminate\Database\QueryException $e) {
+                if ($e->errorInfo[1] == 1062) {
+                    return response()->json(['message' => 'Jam Kelas sudah terisi'], 422);
+                }
+                return response()->json(['message' => 'Terjadi kesalahan database: ' . $e->getMessage()], 422);
             } catch (\Exception $e) {
                 return response()->json(['message' => $e->getMessage()], 422);
             }
