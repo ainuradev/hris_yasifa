@@ -76,6 +76,7 @@
                     <p class="mb-2 px-3 text-[10px] font-bold uppercase tracking-[0.18em] text-teal-400/80">Kepegawaian</p>
                     <div class="space-y-0.5">
                         <x-sidebar-link label="Data Karyawan" route="admin.karyawan.index" match="admin.karyawan.*" icon="users" />
+                        <x-sidebar-link label="Pengajuan Karyawan" route="admin.employee-requests.index" match="admin.employee-requests.*" icon="check" />
                         <x-sidebar-link label="Absensi & Izin" route="admin.absensi.index" match="admin.absensi.*" icon="cal-check" />
                         <x-sidebar-link label="Approval Center" route="admin.approvals.index" match="admin.approvals.*" icon="check" />
                     </div>
@@ -287,5 +288,6 @@
 </div>
 
 @livewireScripts
+@stack('scripts')
 </body>
 </html>

@@ -16,8 +16,10 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
 use Maatwebsite\Excel\Facades\Excel;
+use Throwable;
 
 class EmployeeController extends Controller
 {
@@ -42,21 +44,40 @@ class EmployeeController extends Controller
         return view('admin.karyawan.index', compact('stats', 'units'));
     }
 
+    public function exportExcel(Request $request)
+    {
+        try {
+            $admin = $request->user();
+
+            $unitId = $admin->isAdminPusat()
+                ? ($request->filled('unit_id') ? (int) $request->unit_id : null)
+                : (int) $admin->unit_id;
+
+            $type   = $request->filled('type')   ? $request->type   : null;
+            $status = $request->filled('status') ? $request->status : null;
+
+            $unitName = $unitId ? (Unit::find($unitId)?->name ?? 'Semua') : 'Semua Unit';
+            $filename = 'data-karyawan-' . str($unitName)->slug() . '-' . now()->format('Ymd') . '.xlsx';
+
+            return Excel::download(new EmployeesExport($unitId, $type, $status), $filename);
+        } catch (Throwable $exception) {
+            try {
+                Log::error('Gagal export data karyawan.', [
+                    'user_id' => $request->user()?->id,
+                    'filters' => $request->only(['unit_id', 'type', 'status']),
+                    'exception' => $exception,
+                ]);
+            } catch (Throwable) {
+                // Keep the user-facing error available even when storage/logs is not writable.
+            }
+
+            return back()->with('error', 'Export Excel gagal. Pastikan folder storage dan bootstrap/cache writable, lalu coba lagi.');
+        }
+    }
+
     public function export(Request $request)
     {
-        $admin = $request->user();
-
-        $unitId = $admin->isAdminPusat()
-            ? ($request->filled('unit_id') ? (int) $request->unit_id : null)
-            : (int) $admin->unit_id;
-
-        $type   = $request->filled('type')   ? $request->type   : null;
-        $status = $request->filled('status') ? $request->status : null;
-
-        $unitName = $unitId ? (Unit::find($unitId)?->name ?? 'Semua') : 'Semua Unit';
-        $filename = 'data-karyawan-' . str($unitName)->slug() . '-' . now()->format('Ymd') . '.xlsx';
-
-        return Excel::download(new EmployeesExport($unitId, $type, $status), $filename);
+        return $this->exportExcel($request);
     }
 
     public function create(Request $request): View

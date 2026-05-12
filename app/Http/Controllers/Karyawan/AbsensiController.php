@@ -14,6 +14,9 @@ use Carbon\Carbon;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 class AbsensiController extends Controller
 {
@@ -22,6 +25,9 @@ class AbsensiController extends Controller
         $employee = auth()->user();
         $periodStart = now()->startOfMonth();
         $periodEnd = now()->endOfDay();
+        $attendanceChallenge = Str::random(40);
+
+        session(['attendance_challenge' => $attendanceChallenge]);
         
         $schedule = $scheduleService->ensureScheduleExists($employee->unit_id, today());
 
@@ -55,7 +61,8 @@ class AbsensiController extends Controller
             'schedule',
             'attendanceToday',
             'attendances',
-            'attendancePeriodLabel'
+            'attendancePeriodLabel',
+            'attendanceChallenge'
         ));
     }
 
@@ -63,9 +70,21 @@ class AbsensiController extends Controller
     {
         $validated = $request->validate([
             'notes' => ['nullable', 'string', 'max:255'],
+            'latitude' => ['required', 'numeric', 'between:-90,90'],
+            'longitude' => ['required', 'numeric', 'between:-180,180'],
+            'accuracy' => ['nullable', 'numeric', 'min:0'],
+            'face_image' => ['required', 'string', 'max:7000000'],
+            'face_detected' => ['nullable', 'boolean'],
+            'attendance_challenge' => ['required', 'string'],
         ]);
 
         $employee = auth()->user();
+
+        if (! hash_equals((string) session('attendance_challenge'), $validated['attendance_challenge'])) {
+            throw ValidationException::withMessages([
+                'attendance_challenge' => 'Sesi verifikasi presensi tidak valid. Muat ulang halaman lalu coba lagi.',
+            ]);
+        }
 
         $schedule = $scheduleService->ensureScheduleExists($employee->unit_id, today());
 
@@ -89,21 +108,35 @@ class AbsensiController extends Controller
             return back();
         }
 
-        // Check operational hours: 07:00 - 14:30
-        if ($currentTime < '07:00' || $currentTime > '14:30') {
-            session()->flash('error', 'Di luar jam operasional (07:00 - 14:30).');
-
-            return back();
-        }
+        $locationCheck = $this->validateGeofence((float) $validated['latitude'], (float) $validated['longitude']);
+        $facePath = $this->storeFaceImage($validated['face_image'], $employee->id, $attendance ? 'check-out' : 'check-in');
+        $challengeHash = Hash::make($validated['attendance_challenge']);
 
         if ($attendance) {
             // Perform check-out
             $attendance->update([
                 'checked_out_at' => $now,
+                'check_out_latitude' => $validated['latitude'],
+                'check_out_longitude' => $validated['longitude'],
+                'check_out_distance_meters' => $locationCheck['distance'],
+                'face_check_out_path' => $facePath,
+                'face_verified' => true,
+                'attendance_challenge_hash' => $challengeHash,
+                'attendance_ip' => $request->ip(),
+                'attendance_user_agent' => Str::limit((string) $request->userAgent(), 1000, ''),
                 'notes' => $validated['notes'] ?? $attendance->notes,
             ]);
 
+            session()->forget('attendance_challenge');
             session()->flash('success', 'Absensi pulang berhasil disimpan.');
+
+            return back();
+        }
+
+        // Check-in hanya dibuka pada jam masuk. Check-out tetap boleh lebih sore
+        // karena rapat atau kegiatan sekolah bisa membuat karyawan pulang terlambat.
+        if ($currentTime < '07:00' || $currentTime > '14:30') {
+            session()->flash('error', 'Di luar jam absensi masuk (07:00 - 14:30).');
 
             return back();
         }
@@ -116,6 +149,14 @@ class AbsensiController extends Controller
             'schedule_id' => $schedule->id,
             'checked_in_at' => $now,
             'checked_out_at' => null,
+            'latitude' => $validated['latitude'],
+            'longitude' => $validated['longitude'],
+            'check_in_distance_meters' => $locationCheck['distance'],
+            'face_check_in_path' => $facePath,
+            'face_verified' => true,
+            'attendance_challenge_hash' => $challengeHash,
+            'attendance_ip' => $request->ip(),
+            'attendance_user_agent' => Str::limit((string) $request->userAgent(), 1000, ''),
             'status' => $status,
             'notes' => $validated['notes'] ?? null,
         ]);
@@ -149,6 +190,13 @@ class AbsensiController extends Controller
                         'teacher_subject_unit_id' => $session->id,
                         'jadwal_id' => $session->jadwal_id,
                         'checked_in_at' => $now,
+                        'latitude' => $validated['latitude'],
+                        'longitude' => $validated['longitude'],
+                        'check_in_distance_meters' => $locationCheck['distance'],
+                        'face_check_in_path' => $facePath,
+                        'face_verified' => true,
+                        'attendance_ip' => $request->ip(),
+                        'attendance_user_agent' => Str::limit((string) $request->userAgent(), 1000, ''),
                         'status' => $sessionStatus,
                         'is_approved' => true,
                     ]);
@@ -156,9 +204,104 @@ class AbsensiController extends Controller
             }
         }
 
+        session()->forget('attendance_challenge');
         session()->flash('success', 'Absensi berhasil disimpan.');
 
         return back();
+    }
+
+    private function validateGeofence(float $latitude, float $longitude): array
+    {
+        $target = AttendanceLocation::coordinates();
+
+        if (! $target) {
+            throw ValidationException::withMessages([
+                'latitude' => 'Koordinat yayasan belum dikonfigurasi. Hubungi admin HRIS.',
+            ]);
+        }
+
+        $distance = (int) round(AttendanceLocation::distanceInMeters(
+            $latitude,
+            $longitude,
+            $target['latitude'],
+            $target['longitude']
+        ));
+        $radius = AttendanceLocation::radiusMeters();
+
+        if ($distance > $radius) {
+            throw ValidationException::withMessages([
+                'latitude' => "Anda berada di luar area presensi. Jarak saat ini {$distance} meter, batas maksimal {$radius} meter.",
+            ]);
+        }
+
+        return [
+            'distance' => $distance,
+            'radius' => $radius,
+        ];
+    }
+
+    private function storeFaceImage(string $imageData, int $employeeId, string $action): string
+    {
+        if (! preg_match('/^data:image\/(jpeg|jpg|png|webp);base64,/', $imageData, $matches)) {
+            throw ValidationException::withMessages([
+                'face_image' => 'Foto wajah tidak valid. Ambil ulang foto dari kamera.',
+            ]);
+        }
+
+        $binary = base64_decode(substr($imageData, strpos($imageData, ',') + 1), true);
+
+        if ($binary === false || strlen($binary) < 1024) {
+            throw ValidationException::withMessages([
+                'face_image' => 'Foto wajah gagal dibaca. Ambil ulang foto dari kamera.',
+            ]);
+        }
+
+        if (! @getimagesizefromstring($binary)) {
+            throw ValidationException::withMessages([
+                'face_image' => 'File yang dikirim bukan gambar valid.',
+            ]);
+        }
+
+        $extension = $matches[1] === 'jpg' ? 'jpeg' : $matches[1];
+        $path = sprintf(
+            'attendance-faces/%s/%s-%s-%s.%s',
+            now()->format('Y/m/d'),
+            $employeeId,
+            $action,
+            Str::uuid(),
+            $extension
+        );
+
+        $storageRoot = storage_path('app/public');
+
+        if (! is_dir($storageRoot) || ! is_writable($storageRoot)) {
+            return sprintf(
+                'face-capture-hash/%s/%s-%s-%s.%s',
+                now()->format('Y/m/d'),
+                $employeeId,
+                $action,
+                hash('sha256', $binary),
+                $extension
+            );
+        }
+
+        $directory = storage_path('app/public/'.dirname($path));
+
+        if (! is_dir($directory) && ! mkdir($directory, 0755, true) && ! is_dir($directory)) {
+            throw ValidationException::withMessages([
+                'face_image' => 'Folder penyimpanan foto presensi tidak bisa dibuat.',
+            ]);
+        }
+
+        $fullPath = storage_path('app/public/'.$path);
+
+        if (file_put_contents($fullPath, $binary) === false) {
+            throw ValidationException::withMessages([
+                'face_image' => 'Foto wajah gagal disimpan. Coba lagi atau hubungi admin.',
+            ]);
+        }
+
+        return $path;
     }
     public function koreksi(Request $request): RedirectResponse
     {

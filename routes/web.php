@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\AbsensiController as AdminAbsensiController;
 use App\Http\Controllers\Admin\AnnouncementController as AdminAnnouncementController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\EmployeeController as AdminEmployeeController;
+use App\Http\Controllers\Admin\EmployeeRequestController as AdminEmployeeRequestController;
 
 use App\Http\Controllers\Admin\JadwalGuruController as AdminJadwalGuruController;
 use App\Http\Controllers\Admin\PenggajianController as AdminPenggajianController;
@@ -49,7 +50,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin_pusat,ad
         Route::resource('subjects', \App\Http\Controllers\Admin\SubjectController::class)->except(['create', 'show', 'edit']);
 
         Route::get('/karyawan', [AdminEmployeeController::class, 'index'])->name('karyawan.index');
-        Route::get('/karyawan/export', [AdminEmployeeController::class, 'export'])->name('karyawan.export');
+        Route::get('/karyawan/export', [AdminEmployeeController::class, 'exportExcel'])->name('karyawan.export');
         Route::get('/karyawan/import', \App\Livewire\Admin\Karyawan\Import::class)->name('karyawan.import');
         Route::get('/karyawan/create', [AdminEmployeeController::class, 'create'])->name('karyawan.create');
         Route::post('/karyawan', [AdminEmployeeController::class, 'store'])->name('karyawan.store');
@@ -61,6 +62,12 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin_pusat,ad
         Route::post('/karyawan/{employee}/salary-components', [AdminEmployeeController::class, 'storeSalaryComponent'])->name('karyawan.salary-components.store');
         Route::put('/karyawan/{employee}/salary-components/{component}', [AdminEmployeeController::class, 'updateSalaryComponent'])->name('karyawan.salary-components.update');
         Route::delete('/karyawan/{employee}/salary-components/{component}', [AdminEmployeeController::class, 'destroySalaryComponent'])->name('karyawan.salary-components.destroy');
+
+        Route::get('/pengajuan-karyawan', [AdminEmployeeRequestController::class, 'index'])->name('employee-requests.index');
+        Route::get('/pengajuan-karyawan/create', [AdminEmployeeRequestController::class, 'create'])->name('employee-requests.create');
+        Route::post('/pengajuan-karyawan', [AdminEmployeeRequestController::class, 'store'])->name('employee-requests.store');
+        Route::patch('/pengajuan-karyawan/{employeeRequest}/approve', [AdminEmployeeRequestController::class, 'approve'])->name('employee-requests.approve');
+        Route::patch('/pengajuan-karyawan/{employeeRequest}/reject', [AdminEmployeeRequestController::class, 'reject'])->name('employee-requests.reject');
 
 
         // Unified Rombel Management (Gabungan Jadwal Guru & Kelas)

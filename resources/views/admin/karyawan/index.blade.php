@@ -8,18 +8,19 @@
 
         {{-- PAGE HERO --}}
         <section class="page-hero">
-            <div class="page-hero-grid lg:grid-cols-[1.3fr_0.7fr] lg:items-end">
-                <div>
+            <div class="page-hero-grid lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
+                <div class="relative z-10">
                     <span class="app-eyebrow">Employee Directory</span>
                     <h1>Kelola data induk, unit penempatan, dan status aktif pegawai.</h1>
                     <p>{{ auth()->user()->isAdminPusat() ? 'Satu pintu untuk mengatur data personal, jabatan, dan akses sistem seluruh staf operasional yayasan.' : 'Lihat data pegawai untuk unit Anda dengan filter yang lebih nyaman dipakai.' }}</p>
                 </div>
 
-                <div class="flex flex-wrap gap-3 lg:justify-end" x-data="{ exportOpen: false }">
+                <div class="page-actions" x-data="{ exportOpen: false }">
 
                     {{-- Export Button --}}
                     <div class="relative">
-                        <button @click="exportOpen = !exportOpen"
+                        <button type="button"
+                                @click="exportOpen = !exportOpen"
                                 class="btn-secondary inline-flex items-center gap-2">
                             <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
@@ -29,12 +30,12 @@
 
                         {{-- Export Dropdown Panel --}}
                         <div x-show="exportOpen"
+                             x-cloak
                              x-transition:enter="transition ease-out duration-150"
                              x-transition:enter-start="opacity-0 -translate-y-2"
                              x-transition:enter-end="opacity-100 translate-y-0"
                              @click.outside="exportOpen = false"
-                             class="absolute right-0 z-30 mt-2 w-72 rounded-2xl border border-slate-200 bg-white p-5 shadow-xl"
-                             style="display:none;">
+                             class="page-actions-dropdown">
                             <h4 class="mb-4 text-sm font-black uppercase tracking-widest text-slate-700">Filter Export</h4>
                             <form action="{{ route('admin.karyawan.export') }}" method="GET" class="space-y-3">
 

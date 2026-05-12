@@ -1,5 +1,6 @@
 <x-layouts.app title="Slip Gaji">
     <x-flash-message />
+    @include('payroll._print-styles')
 
     @php
         $status = $payroll->status->value ?? $payroll->status;
@@ -40,7 +41,7 @@
             </div>
 
             {{-- Employee Info --}}
-            <div class="grid grid-cols-2 gap-8 mb-8 bg-slate-50 rounded-2xl p-6 print:bg-transparent print:p-0 print:gap-4">
+            <div class="grid grid-cols-2 gap-8 mb-8 bg-slate-50 rounded-2xl p-6 print-grid-2 print:bg-transparent print:p-0 print:gap-4 print-section">
                 <div class="space-y-3">
                     <div>
                         <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-0.5">Nama Lengkap</p>
@@ -64,7 +65,7 @@
             </div>
 
             {{-- Salary Details --}}
-            <div class="grid md:grid-cols-2 gap-8 print:block print:space-y-8">
+            <div class="grid md:grid-cols-2 gap-8 print-grid-2 print-section">
                 
                 {{-- Pendapatan --}}
                 <div>
@@ -107,7 +108,7 @@
             </div>
 
             {{-- Take Home Pay --}}
-            <div class="mt-10 bg-[#1a2744] rounded-2xl p-6 text-white flex flex-col md:flex-row justify-between items-center print:bg-transparent print:text-slate-900 print:border-2 print:border-slate-900 print:rounded-none">
+            <div class="mt-10 bg-[#1a2744] rounded-2xl p-6 text-white flex flex-col md:flex-row justify-between items-center print:bg-transparent print:text-slate-900 print:border-2 print:border-slate-900 print:rounded-none print-section">
                 <div>
                     <h2 class="text-lg font-bold uppercase tracking-widest text-slate-300 print:text-slate-900">Penerimaan Bersih</h2>
                     <p class="text-sm text-slate-400 mt-1 print:text-slate-600">Take Home Pay</p>
@@ -118,7 +119,7 @@
             </div>
 
             {{-- Footer Signatures --}}
-            <div class="mt-16 pt-8 grid grid-cols-2 gap-8 text-center print:mt-24">
+            <div class="mt-16 pt-8 grid grid-cols-2 gap-8 text-center print-grid-2 print:mt-24 print-section">
                 <div>
                     <p class="text-sm text-slate-500 mb-20">Penerima</p>
                     <p class="text-sm font-bold text-slate-900 underline underline-offset-4">{{ $payroll->employee?->name }}</p>
@@ -132,32 +133,4 @@
         </div>
 
     </div>
-
-    {{-- Print Styles --}}
-    @push('scripts')
-    <style>
-        @media print {
-            body * {
-                visibility: hidden;
-            }
-            #slip-gaji, #slip-gaji * {
-                visibility: visible;
-            }
-            #slip-gaji {
-                position: absolute;
-                left: 0;
-                top: 0;
-                width: 100%;
-                margin: 0;
-                padding: 20px;
-            }
-            .no-print {
-                display: none !important;
-            }
-            /* Menghilangkan header dan sidebar app.blade.php saat di-print */
-            header, aside { display: none !important; }
-            main { padding: 0 !important; }
-        }
-    </style>
-    @endpush
 </x-layouts.app>

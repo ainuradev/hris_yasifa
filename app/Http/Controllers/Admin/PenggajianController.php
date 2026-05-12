@@ -21,6 +21,9 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
+use Throwable;
 
 class PenggajianController extends Controller
 {
@@ -177,10 +180,28 @@ class PenggajianController extends Controller
 
     public function show(Payroll $payroll): View
     {
-        $this->authorizePayrollAccess($payroll, request()->user());
-        $payroll->load(['employee.unit', 'employee.teacherDetail.salaryRate', 'employee.nonTeacherDetail.salaryRate', 'payrollDetails', 'payrollHistories.changedBy', 'snapshot.unit']);
+        try {
+            $this->authorizePayrollAccess($payroll, request()->user());
+            $payroll->load(['employee.unit', 'employee.teacherDetail.salaryRate', 'employee.nonTeacherDetail.salaryRate', 'payrollDetails', 'payrollHistories.changedBy', 'snapshot.unit']);
 
-        return view('admin.penggajian.show', compact('payroll'));
+            return view('admin.penggajian.show', compact('payroll'));
+        } catch (Throwable $exception) {
+            if ($exception instanceof HttpExceptionInterface) {
+                throw $exception;
+            }
+
+            try {
+                Log::error('Gagal membuka slip gaji admin.', [
+                    'user_id' => request()->user()?->id,
+                    'payroll_id' => $payroll->id,
+                    'exception' => $exception,
+                ]);
+            } catch (Throwable) {
+                // Keep the HTTP error available even when storage/logs is not writable.
+            }
+
+            abort(500, 'Slip gaji gagal dibuka. Silakan cek log aplikasi.');
+        }
     }
 
     public function finalize(Payroll $payroll): RedirectResponse

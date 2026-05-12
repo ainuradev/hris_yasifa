@@ -6,9 +6,11 @@ use App\Models\Employee;
 use App\Models\Unit;
 use App\Services\EmployeeImportService;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use Maatwebsite\Excel\Facades\Excel;
+use Throwable;
 
 class Import extends Component
 {
@@ -88,8 +90,18 @@ class Import extends Component
             $this->autoMapColumns();
 
             $this->step = 2;
-        } catch (\Exception $e) {
-            session()->flash('error', 'Gagal membaca file: ' . $e->getMessage());
+        } catch (Throwable $e) {
+            try {
+                Log::error('Gagal membaca file import karyawan.', [
+                    'user_id' => auth()->id(),
+                    'file_name' => $this->file?->getClientOriginalName(),
+                    'exception' => $e,
+                ]);
+            } catch (Throwable) {
+                // Keep the flash error available even when storage/logs is not writable.
+            }
+
+            session()->flash('error', 'Gagal membaca file import. Pastikan format file valid dan folder storage writable.');
         }
     }
 
@@ -178,8 +190,20 @@ class Import extends Component
             }
 
             $this->step = 3;
-        } catch (\Exception $e) {
-            session()->flash('error', 'Terjadi kesalahan sistem: ' . $e->getMessage());
+        } catch (Throwable $e) {
+            try {
+                Log::error('Gagal menjalankan import karyawan.', [
+                    'user_id' => auth()->id(),
+                    'file_name' => $this->file?->getClientOriginalName(),
+                    'mapping' => $this->mapping,
+                    'default_unit_id' => $this->defaultUnitId,
+                    'exception' => $e,
+                ]);
+            } catch (Throwable) {
+                // Keep the flash error available even when storage/logs is not writable.
+            }
+
+            session()->flash('error', 'Import karyawan gagal. Pastikan data sesuai template dan folder storage writable.');
         }
     }
 

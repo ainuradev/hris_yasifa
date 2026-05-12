@@ -13,7 +13,10 @@ class AttendanceCorrection extends Model
     protected $fillable = [
         'employee_id',
         'schedule_id',
-        'correction_date',
+        'attendance_id',
+        'date',
+        'check_in',
+        'check_out',
         'reason',
         'proof_path',
         'status',
@@ -23,7 +26,9 @@ class AttendanceCorrection extends Model
     ];
 
     protected $casts = [
-        'correction_date' => 'date',
+        'date' => 'date',
+        'check_in' => 'datetime:H:i',
+        'check_out' => 'datetime:H:i',
         'reviewed_at' => 'datetime',
     ];
 
