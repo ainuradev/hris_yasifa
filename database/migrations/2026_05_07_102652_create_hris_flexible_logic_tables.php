@@ -11,17 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Drop existing tables if they exist to avoid collision
-        Schema::dropIfExists('payroll_snapshots');
-        Schema::dropIfExists('attendance_corrections');
-        Schema::dropIfExists('subject_permissions');
-        Schema::dropIfExists('subject_unit');
-        Schema::dropIfExists('holidays');
-
         // 1. Tabel Master Hari Libur
         Schema::create('holidays', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
+            $table->string('name', 100);
             $table->date('date');
             $table->foreignId('unit_id')->nullable()->constrained('units')->nullOnDelete();
             $table->timestamps();
@@ -49,13 +42,17 @@ return new class extends Migration
             $table->uuid('jadwal_id')->nullable();
             $table->date('date');
             $table->text('reason');
-            $table->string('status')->default('pending');
+            $table->enum('status', ['pending', 'approved', 'rejected'])->default('pending');
             $table->foreignId('reviewed_by')->nullable()->constrained('employees')->nullOnDelete();
             $table->timestamp('reviewed_at')->nullable();
             $table->text('review_notes')->nullable();
             $table->timestamps();
 
             $table->index(['employee_id', 'date'], 'subject_permissions_employee_date_index');
+            $table->foreign('jadwal_id', 'subject_permissions_jadwal_id_foreign')
+                ->references('jadwal_id')
+                ->on('teacher_subject_unit')
+                ->cascadeOnDelete();
         });
 
         // 4. Tabel Koreksi Absen Harian
@@ -68,10 +65,11 @@ return new class extends Migration
             $table->time('check_in')->nullable();
             $table->time('check_out')->nullable();
             $table->text('reason');
-            $table->string('proof_path')->nullable();
-            $table->string('status')->default('pending');
+            $table->string('proof_path', 255)->nullable();
+            $table->enum('status', ['pending', 'approved', 'rejected'])->default('pending');
             $table->foreignId('reviewed_by')->nullable()->constrained('employees')->nullOnDelete();
             $table->timestamp('reviewed_at')->nullable();
+            $table->text('review_notes')->nullable();
             $table->timestamps();
 
             $table->index(['employee_id', 'date'], 'attendance_corrections_employee_date_index');
@@ -99,6 +97,5 @@ return new class extends Migration
         Schema::dropIfExists('subject_permissions');
         Schema::dropIfExists('subject_unit');
         Schema::dropIfExists('holidays');
-        Schema::dropIfExists('hris_flexible_logic_tables');
     }
 };

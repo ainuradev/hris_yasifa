@@ -10,10 +10,12 @@ return new class extends Migration
     {
         Schema::create('units', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->string('jenjang');
-            $table->string('kepala_unit')->nullable();
+            $table->string('name', 100);
+            $table->enum('jenjang', ['MI', 'MTs', 'MA']);
+            $table->string('kepala_unit', 150)->nullable();
             $table->timestamps();
+
+            $table->unique('jenjang');
         });
     }
 

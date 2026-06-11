@@ -34,7 +34,7 @@
             @elseif ($attendanceToday && $attendanceToday->checked_out_at)
                 <div class="flash-alert mt-5" data-tone="success"><div class="flash-alert-head"><div><h3>Attendance Complete</h3><p>Absensi hari ini selesai. Masuk {{ $attendanceToday->checked_in_at?->format('H:i') ?? '-' }}, pulang {{ $attendanceToday->checked_out_at?->format('H:i') ?? '-' }}.</p></div></div></div>
             @else
-                <form method="POST" action="{{ route('karyawan.absensi.store') }}" class="mt-5 space-y-4" data-attendance-form data-geofence-latitude="{{ $attendanceCenter['latitude'] ?? '' }}" data-geofence-longitude="{{ $attendanceCenter['longitude'] ?? '' }}" data-geofence-radius="{{ $attendanceRadius }}">
+                <form method="POST" action="{{ route('karyawan.absensi.store') }}" class="mt-5 space-y-4" id="attendance-form" data-attendance-form data-geofence-latitude="{{ $attendanceCenter['latitude'] ?? '' }}" data-geofence-longitude="{{ $attendanceCenter['longitude'] ?? '' }}" data-geofence-radius="{{ $attendanceRadius }}">
                     @csrf
                     <input type="hidden" name="latitude" data-attendance-latitude>
                     <input type="hidden" name="longitude" data-attendance-longitude>
@@ -54,58 +54,41 @@
                         </div>
                     @endif
 
-                    <div class="grid gap-4 lg:grid-cols-2">
-                        <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                            <div class="flex items-start justify-between gap-3">
-                                <div>
-                                    <h3 class="text-sm font-bold text-slate-800">Geofencing Lokasi</h3>
-                                    <p class="mt-1 text-xs text-slate-500">Pastikan GPS aktif dan izinkan akses lokasi.</p>
-                                </div>
-                                <span class="badge badge-gray" data-location-status>Menunggu</span>
-                            </div>
-                            <div class="mt-4 grid grid-cols-2 gap-3 text-sm">
-                                <div class="mini-panel">
-                                    <span>Jarak</span>
-                                    <strong data-location-distance>-</strong>
-                                </div>
-                                <div class="mini-panel">
-                                    <span>Radius</span>
-                                    <strong>{{ $attendanceRadius }} m</strong>
-                                </div>
-                            </div>
-                            <button type="button" class="mt-4 rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50" data-location-refresh>
-                                Ambil Lokasi
-                            </button>
-                        </div>
-
-                        <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                            <div class="flex items-start justify-between gap-3">
-                                <div>
-                                    <h3 class="text-sm font-bold text-slate-800">Web Auth Kamera</h3>
-                                    <p class="mt-1 text-xs text-slate-500">Ambil foto wajah langsung dari kamera perangkat.</p>
-                                </div>
-                                <span class="badge badge-gray" data-face-status>Menunggu</span>
-                            </div>
-                            <div class="mt-4 overflow-hidden rounded-2xl border border-slate-200 bg-slate-900">
-                                <video class="h-56 w-full object-cover" autoplay playsinline muted data-face-video></video>
-                                <canvas class="hidden" width="640" height="480" data-face-canvas></canvas>
-                            </div>
-                            <div class="mt-4 flex flex-wrap gap-2">
-                                <button type="button" class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50" data-camera-start>
-                                    Buka Kamera
-                                </button>
-                                <button type="button" class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50" data-face-capture>
-                                    Ambil Foto
-                                </button>
+                    <div id="js-error-alert" class="flash-alert hidden" data-tone="error">
+                        <div class="flash-alert-head">
+                            <div>
+                                <h3>Validasi Gagal</h3>
+                                <p id="js-error-message"></p>
                             </div>
                         </div>
                     </div>
 
-                    <div><label>Keterangan</label><textarea name="notes" rows="3"></textarea></div>
-                    <div class="flex flex-col sm:flex-row gap-3">
-                        <button type="submit" class="btn-primary w-full sm:w-auto disabled:cursor-not-allowed disabled:opacity-60" data-attendance-submit disabled>
-                            {{ $attendanceToday ? 'Tandai pulang' : 'Tandai hadir' }}
-                        </button>
+                    <div id="initial-section">
+                        <div><label class="block text-sm font-bold text-slate-700 mb-1">Keterangan (Opsional)</label><textarea name="notes" rows="2" class="w-full rounded-xl border border-slate-200 px-4 py-2 text-sm focus:border-blue-500 focus:ring-blue-500"></textarea></div>
+                        <div class="mt-4 flex flex-col sm:flex-row gap-3">
+                            <button type="button" class="btn-primary w-full sm:w-auto" id="btn-start-attendance">
+                                {{ $attendanceToday ? 'Tandai pulang' : 'Tandai hadir' }}
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="camera-section" class="hidden rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                        <div class="flex items-start justify-between gap-3">
+                            <div>
+                                <h3 class="text-sm font-bold text-slate-800">Web Auth Kamera</h3>
+                                <p class="mt-1 text-xs text-slate-500">Ambil foto wajah untuk verifikasi kehadiran.</p>
+                            </div>
+                            <span class="badge badge-warning" data-face-status>Menunggu kamera</span>
+                        </div>
+                        <div class="mt-4 overflow-hidden rounded-2xl border border-slate-200 bg-slate-900">
+                            <video class="h-64 w-full object-cover" autoplay playsinline muted data-face-video></video>
+                            <canvas class="hidden" width="640" height="480" data-face-canvas></canvas>
+                        </div>
+                        <div class="mt-4 flex justify-center">
+                            <button type="button" class="btn-primary w-full" data-face-capture>
+                                Ambil Foto & Simpan
+                            </button>
+                        </div>
                     </div>
                 </form>
             @endif
@@ -235,29 +218,27 @@
                 const accuracyInput = form.querySelector('[data-attendance-accuracy]');
                 const faceImageInput = form.querySelector('[data-attendance-face-image]');
                 const faceDetectedInput = form.querySelector('[data-attendance-face-detected]');
-                const submitButton = form.querySelector('[data-attendance-submit]');
-                const locationStatus = form.querySelector('[data-location-status]');
-                const locationDistance = form.querySelector('[data-location-distance]');
-                const locationRefresh = form.querySelector('[data-location-refresh]');
+                
+                const btnStartAttendance = form.querySelector('#btn-start-attendance');
+                const initialSection = form.querySelector('#initial-section');
+                const cameraSection = form.querySelector('#camera-section');
+                const jsErrorAlert = form.querySelector('#js-error-alert');
+                const jsErrorMessage = form.querySelector('#js-error-message');
+                
                 const faceStatus = form.querySelector('[data-face-status]');
-                const cameraStart = form.querySelector('[data-camera-start]');
                 const faceCapture = form.querySelector('[data-face-capture]');
                 const video = form.querySelector('[data-face-video]');
                 const canvas = form.querySelector('[data-face-canvas]');
+                
                 const centerLatitude = Number(form.dataset.geofenceLatitude);
                 const centerLongitude = Number(form.dataset.geofenceLongitude);
                 const radius = Number(form.dataset.geofenceRadius || 100);
-                let hasValidLocation = false;
-                let hasFaceImage = false;
+                
                 let cameraStream = null;
 
                 const setStatus = (element, text, tone) => {
                     element.textContent = text;
                     element.className = `badge ${tone}`;
-                };
-
-                const syncSubmit = () => {
-                    submitButton.disabled = !(hasValidLocation && hasFaceImage);
                 };
 
                 const distanceInMeters = (lat1, lon1, lat2, lon2) => {
@@ -271,26 +252,43 @@
                     return Math.round(earthRadius * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
                 };
 
+                const showError = (msg) => {
+                    jsErrorMessage.textContent = msg;
+                    jsErrorAlert.classList.remove('hidden');
+                    btnStartAttendance.disabled = false;
+                    btnStartAttendance.textContent = btnStartAttendance.dataset.originalText || btnStartAttendance.textContent;
+                };
+
                 const requestLocation = () => {
+                    btnStartAttendance.dataset.originalText = btnStartAttendance.textContent.trim();
+                    btnStartAttendance.disabled = true;
+                    btnStartAttendance.textContent = 'Memvalidasi Lokasi...';
+                    jsErrorAlert.classList.add('hidden');
+
                     if (!navigator.geolocation || !centerLatitude || !centerLongitude) {
-                        setStatus(locationStatus, 'Gagal', 'badge-danger');
+                        showError('Akses lokasi tidak tersedia pada perangkat ini.');
                         return;
                     }
 
-                    setStatus(locationStatus, 'Memuat', 'badge-warning');
                     navigator.geolocation.getCurrentPosition((position) => {
                         const distance = distanceInMeters(position.coords.latitude, position.coords.longitude, centerLatitude, centerLongitude);
                         latitudeInput.value = position.coords.latitude.toFixed(7);
                         longitudeInput.value = position.coords.longitude.toFixed(7);
                         accuracyInput.value = Math.round(position.coords.accuracy || 0);
-                        locationDistance.textContent = `${distance} m`;
-                        hasValidLocation = distance <= radius;
-                        setStatus(locationStatus, hasValidLocation ? 'Valid' : 'Di luar area', hasValidLocation ? 'badge-success' : 'badge-danger');
-                        syncSubmit();
-                    }, () => {
-                        hasValidLocation = false;
-                        setStatus(locationStatus, 'Ditolak', 'badge-danger');
-                        syncSubmit();
+                        
+                        if (distance <= radius) {
+                            // Lokasi valid, lanjutkan ke kamera
+                            initialSection.classList.add('hidden');
+                            cameraSection.classList.remove('hidden');
+                            startCamera();
+                        } else {
+                            // Di luar area
+                            showError('Jarak tidak sesuai dengan lokasi yang ditentukan. Jarak Anda: ' + distance + 'm (Maks: ' + radius + 'm).');
+                        }
+                    }, (error) => {
+                        let errorMsg = 'Gagal mengambil lokasi. Pastikan GPS aktif dan diizinkan.';
+                        if(error.code === 1) errorMsg = 'Akses lokasi ditolak oleh browser/perangkat.';
+                        showError(errorMsg);
                     }, {
                         enableHighAccuracy: true,
                         timeout: 15000,
@@ -308,18 +306,18 @@
                         setStatus(faceStatus, 'Kamera aktif', 'badge-warning');
                     } catch (error) {
                         setStatus(faceStatus, 'Kamera ditolak', 'badge-danger');
+                        showError('Gagal mengakses kamera. Pastikan izin kamera diberikan.');
                     }
                 };
 
                 const captureFace = async () => {
-                    if (!video.srcObject) {
-                        await startCamera();
-                    }
-
                     if (!video.srcObject || video.readyState < 2) {
                         setStatus(faceStatus, 'Belum siap', 'badge-warning');
                         return;
                     }
+
+                    faceCapture.disabled = true;
+                    faceCapture.textContent = 'Menyimpan...';
 
                     const context = canvas.getContext('2d');
                     context.drawImage(video, 0, 0, canvas.width, canvas.height);
@@ -328,39 +326,30 @@
                         try {
                             const detector = new FaceDetector({ fastMode: true, maxDetectedFaces: 1 });
                             const faces = await detector.detect(canvas);
-                            if (faces.length < 1) {
-                                hasFaceImage = false;
-                                faceImageInput.value = '';
+                            if (faces.length > 0) {
+                                faceDetectedInput.value = '1';
+                            } else {
                                 faceDetectedInput.value = '0';
-                                setStatus(faceStatus, 'Wajah tidak terbaca', 'badge-danger');
-                                syncSubmit();
-                                return;
                             }
-                            faceDetectedInput.value = '1';
                         } catch (error) {
                             faceDetectedInput.value = '0';
                         }
                     }
 
                     faceImageInput.value = canvas.toDataURL('image/jpeg', 0.82);
-                    hasFaceImage = true;
                     setStatus(faceStatus, 'Foto siap', 'badge-success');
-                    syncSubmit();
+                    
+                    // Stop camera stream before submitting
+                    if (cameraStream) {
+                        cameraStream.getTracks().forEach(track => track.stop());
+                    }
+                    
+                    // Submit form automatically
+                    form.submit();
                 };
 
-                locationRefresh.addEventListener('click', requestLocation);
-                cameraStart.addEventListener('click', startCamera);
+                btnStartAttendance.addEventListener('click', requestLocation);
                 faceCapture.addEventListener('click', captureFace);
-                form.addEventListener('submit', (event) => {
-                    if (!hasValidLocation || !hasFaceImage) {
-                        event.preventDefault();
-                        requestLocation();
-                        setStatus(faceStatus, hasFaceImage ? 'Foto siap' : 'Ambil foto dulu', hasFaceImage ? 'badge-success' : 'badge-warning');
-                    }
-                });
-
-                requestLocation();
-                startCamera();
             });
         });
     </script>

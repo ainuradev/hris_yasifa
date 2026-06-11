@@ -293,6 +293,22 @@ class EmployeeController extends Controller
         ]);
 
         $component = \App\Models\SalaryComponent::find($validated['salary_component_id']);
+
+        // Validasi: Tunjangan Wali Kelas hanya boleh untuk guru yang terdaftar sebagai wali kelas
+        if (
+            $component->type === 'tunjangan' &&
+            str_contains(strtolower($component->name), 'wali kelas')
+        ) {
+            $employee->load('teacherDetail.homeroomClass');
+            $isHomeroom = $employee->teacherDetail?->homeroomClass !== null;
+
+            if (! $isHomeroom) {
+                return back()
+                    ->withInput()
+                    ->with('error', "Tunjangan Wali Kelas tidak dapat ditambahkan karena {$employee->name} bukan wali kelas. Daftarkan guru sebagai wali kelas terlebih dahulu di menu Data Kelas.");
+            }
+        }
+
         if ($validated['amount'] === null) {
             $validated['amount'] = $component->default_amount;
         }

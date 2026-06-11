@@ -12,7 +12,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('employee_id')->unique()->constrained()->cascadeOnDelete();
             $table->foreignId('salary_rate_id')->constrained()->cascadeOnDelete();
-            $table->string('jabatan');
+            $table->string('jabatan', 100);
         });
     }
 

@@ -13,7 +13,8 @@ return new class extends Migration
     {
         Schema::create('salary_components', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
+            $table->foreignId('unit_id')->nullable()->constrained()->nullOnDelete();
+            $table->string('name', 100);
             $table->enum('type', ['tunjangan', 'potongan']);
             $table->decimal('default_amount', 15, 2)->default(0);
             $table->timestamps();

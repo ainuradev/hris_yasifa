@@ -11,7 +11,7 @@ return new class extends Migration
         Schema::create('payroll_details', function (Blueprint $table) {
             $table->id();
             $table->foreignId('payroll_id')->constrained()->cascadeOnDelete();
-            $table->string('description');
+            $table->string('description', 150);
             $table->decimal('amount', 15, 2);
             $table->enum('category', ['tunjangan', 'potongan']);
         });

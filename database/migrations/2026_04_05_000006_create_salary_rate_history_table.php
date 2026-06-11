@@ -13,7 +13,7 @@ return new class extends Migration
             $table->foreignId('salary_rate_id')->constrained()->cascadeOnDelete();
             $table->decimal('old_rate', 15, 2);
             $table->decimal('new_rate', 15, 2);
-            $table->string('reason')->nullable();
+            $table->string('reason', 150)->nullable();
             $table->unsignedBigInteger('changed_by');
             $table->timestamp('changed_at');
 

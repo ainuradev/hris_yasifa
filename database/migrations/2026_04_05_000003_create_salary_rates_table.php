@@ -10,7 +10,8 @@ return new class extends Migration
     {
         Schema::create('salary_rates', function (Blueprint $table) {
             $table->id();
-            $table->string('jabatan');
+            $table->foreignId('unit_id')->nullable()->constrained()->cascadeOnDelete();
+            $table->string('jabatan', 100);
             $table->enum('type', ['guru', 'non_guru']);
             $table->decimal('rate', 15, 2);
             $table->timestamps();

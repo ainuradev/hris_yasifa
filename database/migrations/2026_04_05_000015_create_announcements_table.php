@@ -12,10 +12,11 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('unit_id')->nullable();
             $table->unsignedBigInteger('created_by');
-            $table->string('title');
+            $table->string('title', 150);
             $table->text('content');
             $table->enum('category', ['umum', 'penggajian', 'absensi', 'kegiatan']);
             $table->boolean('is_global')->default(false);
+            $table->timestamp('expires_at')->nullable();
             $table->timestamps();
 
             $table->foreign('unit_id', 'fk_ann_unit')

@@ -18,6 +18,12 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        if (app()->environment('production')) {
+            $this->call(ProductionSeeder::class);
+
+            return;
+        }
+
         $now = now();
         $today = Carbon::today();
         $contractEndDate = $today->copy()->addYear()->format('Y-m-d');

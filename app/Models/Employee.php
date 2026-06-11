@@ -137,19 +137,9 @@ class Employee extends Authenticatable
         return $this->hasMany(EmployeeSalaryComponent::class);
     }
 
-    public function employeeRequests(): HasMany
-    {
-        return $this->hasMany(EmployeeRequest::class, 'requested_by');
-    }
-
     public function subjects(): BelongsToMany
     {
         return $this->belongsToMany(Subject::class, 'employee_subjects')->withTimestamps();
-    }
-
-    public function approvedEmployeeRequests(): HasMany
-    {
-        return $this->hasMany(EmployeeRequest::class, 'approved_by');
     }
 
     public function isAdminPusat(): bool

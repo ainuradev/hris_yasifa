@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('employee_id')->constrained()->cascadeOnDelete();
             $table->foreignId('salary_component_id')->constrained()->cascadeOnDelete();
             $table->decimal('amount', 15, 2)->nullable();
-            $table->string('description')->nullable();
+            $table->string('description', 150)->nullable();
             $table->timestamps();
         });
     }

@@ -10,7 +10,13 @@ return new class extends Migration
     {
         Schema::create('subjects', function (Blueprint $table) {
             $table->id();
-            $table->string('name')->unique();
+            $table->foreignId('unit_id')->nullable()
+                ->constrained('units')
+                ->nullOnDelete();
+            $table->string('name', 100);
+            $table->unsignedTinyInteger('jp_per_week')->default(4);
+
+            $table->unique(['unit_id', 'name'], 'subjects_unit_name_unique');
         });
     }
 

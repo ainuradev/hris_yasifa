@@ -11,9 +11,9 @@ return new class extends Migration
         Schema::create('payroll_history', function (Blueprint $table) {
             $table->id();
             $table->foreignId('payroll_id')->constrained()->cascadeOnDelete();
-            $table->string('field_changed');
-            $table->string('old_value')->nullable();
-            $table->string('new_value')->nullable();
+            $table->string('field_changed', 100);
+            $table->string('old_value', 255)->nullable();
+            $table->string('new_value', 255)->nullable();
             $table->unsignedBigInteger('changed_by');
             $table->timestamp('changed_at');
 

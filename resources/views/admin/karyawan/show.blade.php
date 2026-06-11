@@ -161,8 +161,27 @@
                         </div>
                     </div>
                     
+                    @php
+                        $isHomeroomTeacher = $employee->teacherDetail?->homeroomClass !== null;
+                    @endphp
+
                     <div class="w-full md:w-1/3 rounded-2xl border border-slate-200 bg-white shadow-sm p-6">
                         <h3 class="mb-4 text-sm font-semibold text-slate-800">Assign Komponen Baru</h3>
+
+                        {{-- Warning: Tunjangan Wali Kelas restricted --}}
+                        @if (!$isHomeroomTeacher && $availableComponents->where('type', 'tunjangan')->filter(fn($c) => str_contains(strtolower($c->name), 'wali kelas'))->isNotEmpty())
+                            <div class="mb-4 flex items-start gap-2 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">
+                                <svg class="mt-0.5 h-4 w-4 shrink-0 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+                                </svg>
+                                <p class="text-xs text-amber-700 leading-relaxed">
+                                    <span class="font-semibold">Tunjangan Wali Kelas</span> tidak tersedia karena
+                                    <span class="font-semibold">{{ $employee->name }}</span> belum terdaftar sebagai wali kelas.
+                                    Daftarkan terlebih dahulu di menu <span class="font-semibold">Data Kelas</span>.
+                                </p>
+                            </div>
+                        @endif
+
                         <form action="{{ route('admin.karyawan.salary-components.store', $employee) }}" method="POST" class="grid gap-4">
                             @csrf
                             <div>
@@ -170,7 +189,16 @@
                                 <select name="salary_component_id" class="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm focus:border-indigo-500 focus:ring-indigo-500" required>
                                     <option value="">-- Pilih Komponen --</option>
                                     @foreach ($availableComponents as $comp)
-                                        <option value="{{ $comp->id }}">{{ $comp->name }} ({{ ucfirst($comp->type) }})</option>
+                                        @php
+                                            $isWaliKelasComp = $comp->type === 'tunjangan' && str_contains(strtolower($comp->name), 'wali kelas');
+                                            $isDisabled = $isWaliKelasComp && !$isHomeroomTeacher;
+                                        @endphp
+                                        <option
+                                            value="{{ $comp->id }}"
+                                            {{ $isDisabled ? 'disabled' : '' }}
+                                        >
+                                            {{ $comp->name }} ({{ ucfirst($comp->type) }}){{ $isDisabled ? ' — Bukan Wali Kelas' : '' }}
+                                        </option>
                                     @endforeach
                                 </select>
                             </div>

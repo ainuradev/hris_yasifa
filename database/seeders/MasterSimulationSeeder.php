@@ -21,6 +21,7 @@ use App\Enums\EmployeeType;
 use App\Enums\EmployeeRole;
 use App\Enums\EmployeeStatus;
 use App\Enums\AttendanceStatus;
+use App\Enums\DayType;
 use App\Http\Controllers\Admin\PenggajianController;
 use Illuminate\Http\Request;
 
@@ -231,7 +232,7 @@ class MasterSimulationSeeder extends Seeder
         $nowTimestamp = now();
 
         foreach ($allSchedules as $sched) {
-            if ($sched->day_type === 'libur') continue;
+            if ($sched->day_type === DayType::Libur) continue;
             
             $date = Carbon::parse($sched->work_date);
             $dayNameIndo = $this->getIndoDayName($date);

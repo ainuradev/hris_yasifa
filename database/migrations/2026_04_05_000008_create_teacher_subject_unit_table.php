@@ -10,15 +10,19 @@ return new class extends Migration
     {
         Schema::create('teacher_subject_unit', function (Blueprint $table) {
             $table->id();
+            $table->uuid('jadwal_id')->nullable();
             $table->foreignId('teacher_detail_id')->constrained()->cascadeOnDelete();
             $table->foreignId('unit_id')->constrained()->cascadeOnDelete();
             $table->foreignId('subject_id')->constrained()->cascadeOnDelete();
             $table->foreignId('class_id')->nullable()->constrained('classes')->nullOnDelete();
             $table->unsignedTinyInteger('hours_per_week');
-            $table->string('day_name')->nullable();
+            $table->enum('day_name', ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'])->nullable();
             $table->time('start_time')->nullable();
             $table->time('end_time')->nullable();
             $table->timestamps();
+
+            $table->unique('jadwal_id', 'teacher_subject_unit_jadwal_id_unique');
+            $table->unique(['teacher_detail_id', 'day_name', 'start_time'], 'teacher_subject_unit_teacher_slot_unique');
         });
     }
 

@@ -41,7 +41,7 @@ class MarkAbsentEmployees extends Command
             $schedule = $scheduleService->ensureScheduleExists($employee->unit_id, $dateStr);
 
             // Skip if it's a holiday or off-day
-            if ($schedule->day_type === DayType::Libur->value) {
+            if ($schedule->day_type === DayType::Libur) {
                 continue;
             }
 
