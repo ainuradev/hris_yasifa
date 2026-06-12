@@ -59,19 +59,20 @@ class ProductionSeeder extends Seeder
     private function seedAdmins(array $unitIds): void
     {
         $defaultPassword = (string) config('hris.seeders.admin_password', 'admin123');
+        $emails = config('hris.seeders.admin_emails');
 
         $this->upsertAdmin([
             'unit_id' => null,
             'name' => 'Administrator Pusat',
             'nik' => 'ADMIN0001',
-            'email' => 'admin@sirojulfalah.test',
+            'email' => $emails['pusat'],
             'role' => 'admin_pusat',
         ], $defaultPassword);
 
         foreach ([
-            ['unit_id' => $unitIds['MI'], 'name' => 'Admin MI Sirojul Falah', 'nik' => 'ADM001', 'email' => 'admin-mi@sirojulfalah.test'],
-            ['unit_id' => $unitIds['MTs'], 'name' => 'Admin MTs Sirojul Falah', 'nik' => 'ADM002', 'email' => 'admin-mts@sirojulfalah.test'],
-            ['unit_id' => $unitIds['MA'], 'name' => 'Admin MA Sirojul Falah', 'nik' => 'ADM003', 'email' => 'admin-ma@sirojulfalah.test'],
+            ['unit_id' => $unitIds['MI'], 'name' => 'Admin MI Sirojul Falah', 'nik' => 'ADM001', 'email' => $emails['mi']],
+            ['unit_id' => $unitIds['MTs'], 'name' => 'Admin MTs Sirojul Falah', 'nik' => 'ADM002', 'email' => $emails['mts']],
+            ['unit_id' => $unitIds['MA'], 'name' => 'Admin MA Sirojul Falah', 'nik' => 'ADM003', 'email' => $emails['ma']],
         ] as $admin) {
             $this->upsertAdmin([
                 ...$admin,

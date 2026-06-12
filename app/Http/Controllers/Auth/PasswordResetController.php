@@ -7,9 +7,9 @@ use Illuminate\Http\Request;
 use App\Models\Employee;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\SendOtpMail;
-use Illuminate\Support\Str;
 
 class PasswordResetController extends Controller
 {
@@ -51,6 +51,12 @@ class PasswordResetController extends Controller
         try {
             Mail::to($employee->email)->send(new SendOtpMail($otp, $employee->name));
         } catch (\Exception $e) {
+            Log::warning('Gagal mengirim OTP reset password.', [
+                'employee_id' => $employee->id,
+                'email' => $employee->email,
+                'error' => $e->getMessage(),
+            ]);
+
             return back()->withInput()->with('error', 'Gagal mengirim email OTP. Pastikan konfigurasi SMTP sudah benar.');
         }
 
@@ -114,6 +120,12 @@ class PasswordResetController extends Controller
         try {
             Mail::to($employee->email)->send(new SendOtpMail($otp, $employee->name));
         } catch (\Exception $e) {
+            Log::warning('Gagal mengirim ulang OTP reset password.', [
+                'employee_id' => $employee->id,
+                'email' => $employee->email,
+                'error' => $e->getMessage(),
+            ]);
+
             return back()->with('error', 'Gagal mengirim ulang email OTP.');
         }
 
