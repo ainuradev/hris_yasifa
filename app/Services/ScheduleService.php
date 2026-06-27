@@ -64,7 +64,19 @@ class ScheduleService
         $date = Carbon::parse($date)->toDateString();
 
         return Holiday::query()
-            ->whereDate('date', $date)
+            ->where(function ($query) use ($date): void {
+                // Libur 1 hari (end_date null) → cocokkan exact date
+                $query->where(function ($q) use ($date): void {
+                    $q->whereNull('end_date')
+                      ->whereDate('date', $date);
+                })
+                // Libur range (end_date terisi) → cek apakah tanggal ada di dalam range
+                ->orWhere(function ($q) use ($date): void {
+                    $q->whereNotNull('end_date')
+                      ->whereDate('date', '<=', $date)
+                      ->whereDate('end_date', '>=', $date);
+                });
+            })
             ->where(function ($query) use ($unitId): void {
                 $query->whereNull('unit_id')
                     ->orWhere('unit_id', $unitId);

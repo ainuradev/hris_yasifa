@@ -13,11 +13,13 @@ class Holiday extends Model
     protected $fillable = [
         'name',
         'date',
+        'end_date',
         'unit_id',
     ];
 
     protected $casts = [
         'date' => 'date',
+        'end_date' => 'date',
     ];
 
     public function unit(): BelongsTo

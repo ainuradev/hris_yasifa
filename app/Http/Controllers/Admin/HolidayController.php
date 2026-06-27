@@ -22,8 +22,14 @@ class HolidayController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'date' => 'required|date',
+            'end_date' => 'nullable|date|after_or_equal:date',
             'unit_id' => 'nullable|exists:units,id',
         ]);
+
+        // Jika end_date tidak diisi, berarti libur 1 hari saja
+        if (empty($validated['end_date'])) {
+            $validated['end_date'] = null;
+        }
 
         Holiday::create($validated);
 

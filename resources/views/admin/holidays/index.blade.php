@@ -20,8 +20,13 @@
                         <input type="text" name="name" required class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm focus:border-[#1a2744] focus:ring-[#1a2744]" placeholder="Misal: Idul Fitri, Libur Semester...">
                     </div>
                     <div>
-                        <label class="mb-1 block text-sm font-medium text-slate-700">Tanggal</label>
+                        <label class="mb-1 block text-sm font-medium text-slate-700">Tanggal Mulai</label>
                         <input type="date" name="date" required class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm focus:border-[#1a2744] focus:ring-[#1a2744]">
+                    </div>
+                    <div>
+                        <label class="mb-1 block text-sm font-medium text-slate-700">Sampai Tanggal <span class="text-slate-400 font-normal">(Opsional)</span></label>
+                        <input type="date" name="end_date" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm focus:border-[#1a2744] focus:ring-[#1a2744]">
+                        <p class="mt-1 text-[10px] text-slate-500 italic">Kosongkan jika libur hanya 1 hari.</p>
                     </div>
                     <div>
                         <label class="mb-1 block text-sm font-medium text-slate-700">Unit (Opsional)</label>
@@ -54,6 +59,13 @@
                                 <tr class="hover:bg-slate-50 transition-colors">
                                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-700">
                                         {{ \Carbon\Carbon::parse($holiday->date)->format('d M Y') }}
+                                        @if($holiday->end_date)
+                                            <span class="text-slate-400 mx-1">—</span>
+                                            {{ \Carbon\Carbon::parse($holiday->end_date)->format('d M Y') }}
+                                            <span class="ml-1.5 inline-flex items-center rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-bold text-amber-600">
+                                                {{ \Carbon\Carbon::parse($holiday->date)->diffInDays(\Carbon\Carbon::parse($holiday->end_date)) + 1 }} hari
+                                            </span>
+                                        @endif
                                     </td>
                                     <td class="px-6 py-4 text-sm text-slate-600 font-semibold">
                                         {{ $holiday->name }}
