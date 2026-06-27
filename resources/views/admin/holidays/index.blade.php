@@ -28,6 +28,7 @@
                         <input type="date" name="end_date" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm focus:border-[#1a2744] focus:ring-[#1a2744]">
                         <p class="mt-1 text-[10px] text-slate-500 italic">Kosongkan jika libur hanya 1 hari.</p>
                     </div>
+                    @if(auth()->user()->isAdminPusat())
                     <div>
                         <label class="mb-1 block text-sm font-medium text-slate-700">Unit (Opsional)</label>
                         <select name="unit_id" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm focus:border-[#1a2744] focus:ring-[#1a2744]">
@@ -38,6 +39,7 @@
                         </select>
                         <p class="mt-1 text-[10px] text-slate-500 italic">Pilih unit jika libur hanya berlaku untuk MI/MA saja.</p>
                     </div>
+                    @endif
                     <button type="submit" class="w-full rounded-2xl bg-[#1a2744] py-3 text-sm font-bold text-white shadow-lg transition-transform hover:scale-[1.02]">Simpan Libur</button>
                 </form>
             </div>
@@ -78,12 +80,30 @@
                                         @endif
                                     </td>
                                     <td class="px-6 py-4 text-center whitespace-nowrap text-sm font-medium">
-                                        <form action="{{ route('admin.holidays.destroy', $holiday) }}" method="POST" onsubmit="return confirm('Hapus hari libur ini?')">
-                                            @csrf @method('DELETE')
-                                            <button type="submit" class="text-rose-500 hover:text-rose-700 transition-colors">
-                                                <svg class="h-5 w-5 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                                            </button>
-                                        </form>
+                                        @php
+                                            $canManage = false;
+                                            if (auth()->user()->isAdminPusat() && $holiday->unit_id === null) {
+                                                $canManage = true;
+                                            } elseif (auth()->user()->isAdminUnit() && $holiday->unit_id === auth()->user()->unit_id) {
+                                                $canManage = true;
+                                            }
+                                        @endphp
+
+                                        @if($canManage)
+                                        <div class="flex items-center justify-center gap-3">
+                                            <a href="{{ route('admin.holidays.edit', $holiday) }}" class="text-amber-500 hover:text-amber-700 transition-colors" title="Edit">
+                                                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                            </a>
+                                            <form action="{{ route('admin.holidays.destroy', $holiday) }}" method="POST" onsubmit="return confirm('Hapus hari libur ini?')">
+                                                @csrf @method('DELETE')
+                                                <button type="submit" class="text-rose-500 hover:text-rose-700 transition-colors" title="Hapus">
+                                                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                                </button>
+                                            </form>
+                                        </div>
+                                        @else
+                                        <span class="text-xs text-slate-400 italic">Hanya lihat</span>
+                                        @endif
                                     </td>
                                 </tr>
                             @empty

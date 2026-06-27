@@ -98,7 +98,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin_pusat,ad
         Route::put('/pengumuman/{pengumuman}', [AdminAnnouncementController::class, 'update'])->name('pengumuman.update');
         Route::delete('/pengumuman/{pengumuman}', [AdminAnnouncementController::class, 'destroy'])->name('pengumuman.destroy');
 
-        Route::resource('holidays', \App\Http\Controllers\Admin\HolidayController::class)->only(['index', 'store', 'destroy']);
+        Route::resource('holidays', \App\Http\Controllers\Admin\HolidayController::class)->except(['show', 'create']);
 
         Route::get('/approvals', [\App\Http\Controllers\Admin\ApprovalController::class, 'index'])->name('approvals.index');
         Route::patch('/approvals/permission/{permission}/approve', [\App\Http\Controllers\Admin\ApprovalController::class, 'approvePermission'])->name('approvals.permission.approve');
